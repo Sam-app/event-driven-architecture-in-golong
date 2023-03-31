@@ -56,3 +56,30 @@ func StartBasket(id, customerID string) (*Basket, error) {
 
 	return basket, nil
 }
+
+func (b *Basket) isOpen() bool {
+	return b.Status == BasketOpen
+}
+
+func (b *Basket) isCancellable() bool {
+	return b.Status == BasketOpen
+}
+
+func (b *Basket) Checkout(PaymentID string) error {
+	if !b.isOpen() {
+		return ErrBasketCannotBeModified
+	}
+
+	if len(b.Items) == 0 {
+		return ErrorBasketHasNoItems
+	}
+
+	if PaymentID == "" {
+		return ErrPaymentIDCannotBeBlank
+	}
+
+	b.PaymentID = PaymentID
+	b.Status = BasketCheckedOut
+
+	return nil
+}
