@@ -130,3 +130,26 @@ func (b *Basket) AddItem(store *Store, product *Product, quantity int) error {
 
 	return nil
 }
+
+func (b *Basket) RemoveItem(product *Product, quantity int) error {
+	if !b.IsOpen() {
+		return ErrBasketCannotBeModified
+	}
+
+	if quantity < 0 {
+		return ErrQuantityCannotBeNegative
+	}
+
+	for i, item := range b.Items {
+		if item.ProductID == product.ID && item.StoreID == product.StoreID {
+			b.Items[i].Quantity -= quantity
+
+			if b.Items[i].Quantity < 1 {
+				b.Items = append(b.Items[:i], b.Items[i+1:]...)
+			}
+			return nil
+		}
+	}
+
+	return nil
+}
