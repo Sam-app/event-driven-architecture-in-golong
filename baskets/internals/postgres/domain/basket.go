@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"sort"
+
 	"github.com/stackus/errors"
 )
 
@@ -93,6 +95,38 @@ func (b *Basket) Checkout(paymentID string) error {
 
 	b.PaymentID = paymentID
 	b.Status = BasketCheckedOut
+
+	return nil
+}
+
+func (b *Basket) AddItem(store *Store, product *Product, quantity int) error {
+	if !b.IsOpen() {
+		return ErrBasketCannotBeModified
+	}
+
+	if quantity < 0 {
+		return ErrQuantityCannotBeNegative
+	}
+
+	for i, item := range b.Items {
+		if item.ProductID == product.ID && item.StoreID == product.StoreID {
+			b.Items[i].Quantity += quantity
+			return nil
+		}
+	}
+
+	b.Items = append(b.Items, Item{
+		StoreID:      store.ID,
+		ProductID:    product.ID,
+		StoreName:    store.Name,
+		ProductName:  product.Name,
+		ProductPrice: product.Price,
+		Quantity:     quantity,
+	})
+
+	sort.Slice(b.Items, func(i, j int) bool {
+		return b.Items[i].StoreName <= b.Items[j].StoreName && b.Items[i].ProductName < b.Items[j].ProductName
+	})
 
 	return nil
 }
