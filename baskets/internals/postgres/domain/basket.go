@@ -1,13 +1,15 @@
 package domain
 
-import "github.com/stackus/errors"
+import (
+	"github.com/stackus/errors"
+)
 
 var (
-	ErrorBasketHasNoItems       = errors.Wrap(errors.ErrBadRequest, "the basket has no items")
+	ErrBasketHasNoItems         = errors.Wrap(errors.ErrBadRequest, "the basket has no items")
 	ErrBasketCannotBeModified   = errors.Wrap(errors.ErrBadRequest, "the basket cannot be modified")
-	ErrBasketCannotBeCancelled  = errors.Wrap(errors.ErrBadRequest, "the basket cannot be modified")
+	ErrBasketCannotBeCancelled  = errors.Wrap(errors.ErrBadRequest, "the basket cannot be cancelled")
 	ErrQuantityCannotBeNegative = errors.Wrap(errors.ErrBadRequest, "the item quantity cannot be negative")
-	ErrBasketIDCannotBeBlank    = errors.Wrap(errors.ErrBadRequest, "the basket id cannot be black")
+	ErrBasketIDCannotBeBlank    = errors.Wrap(errors.ErrBadRequest, "the basket id cannot be blank")
 	ErrPaymentIDCannotBeBlank   = errors.Wrap(errors.ErrBadRequest, "the payment id cannot be blank")
 	ErrCustomerIDCannotBeBlank  = errors.Wrap(errors.ErrBadRequest, "the customer id cannot be blank")
 )
@@ -31,11 +33,11 @@ func (s BasketStatus) String() string {
 }
 
 type Basket struct {
-	ID        string
-	CustomID  string
-	PaymentID string
-	Items     []Item
-	Status    BasketStatus
+	ID         string
+	CustomerID string
+	PaymentID  string
+	Items      []Item
+	Status     BasketStatus
 }
 
 func StartBasket(id, customerID string) (*Basket, error) {
@@ -48,37 +50,48 @@ func StartBasket(id, customerID string) (*Basket, error) {
 	}
 
 	basket := &Basket{
-		ID:       id,
-		CustomID: customerID,
-		Status:   BasketOpen,
-		Items:    []Item{},
+		ID:         id,
+		CustomerID: customerID,
+		Status:     BasketOpen,
+		Items:      []Item{},
 	}
 
 	return basket, nil
 }
 
-func (b *Basket) isOpen() bool {
+func (b Basket) IsCancellable() bool {
 	return b.Status == BasketOpen
 }
 
-func (b *Basket) isCancellable() bool {
+func (b Basket) IsOpen() bool {
 	return b.Status == BasketOpen
 }
 
-func (b *Basket) Checkout(PaymentID string) error {
-	if !b.isOpen() {
+func (b *Basket) Cancel() error {
+	if !b.IsCancellable() {
+		return ErrBasketCannotBeCancelled
+	}
+
+	b.Status = BasketCancelled
+	b.Items = []Item{}
+
+	return nil
+}
+
+func (b *Basket) Checkout(paymentID string) error {
+	if !b.IsOpen() {
 		return ErrBasketCannotBeModified
 	}
 
 	if len(b.Items) == 0 {
-		return ErrorBasketHasNoItems
+		return ErrBasketHasNoItems
 	}
 
-	if PaymentID == "" {
+	if paymentID == "" {
 		return ErrPaymentIDCannotBeBlank
 	}
 
-	b.PaymentID = PaymentID
+	b.PaymentID = paymentID
 	b.Status = BasketCheckedOut
 
 	return nil
