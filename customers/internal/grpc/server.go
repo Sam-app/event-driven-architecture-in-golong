@@ -31,3 +31,11 @@ func (s server) RegisterCustomer(ctx context.Context, request *customerspb.Regis
 	})
 	return &customerspb.RegisterCustomerResponse{Id: id}, err
 }
+
+func (s server) AuthorizeCustomer(ctx context.Context, request *customerspb.AuthorizeCustomerRequest) (*customerspb.AuthorizeCustomerResponse, error) {
+	err := s.app.AuthorizeCustomer(ctx, application.AuthorizeCustomer{
+		ID: request.GetId(),
+	})
+
+	return &customerspb.AuthorizeCustomerResponse{}, err
+}
