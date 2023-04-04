@@ -8,8 +8,8 @@ import (
 
 	"github.com/stackus/dotenv"
 
-	"eda-in-golang/internal/rpc"
-	"eda-in-golang/internal/web"
+	"eda-in-go/internal/rpc"
+	"eda-in-go/internal/web"
 )
 
 type (
