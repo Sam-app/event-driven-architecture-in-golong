@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-
 	"eda-in-go/customers/customerspb"
 	"eda-in-go/customers/internal/application"
 	"eda-in-go/customers/internal/domain"
@@ -55,11 +54,13 @@ func (s server) GetCustomer(ctx context.Context, request *customerspb.GetCustome
 }
 
 func (s server) EnableCustomer(ctx context.Context, request *customerspb.EnableCustomerRequest) (*customerspb.EnableCustomerResponse, error) {
-	err := s.app.EnableCustomer(ctx, application.EnableCustomer{
-		ID: request.GetId(),
-	})
-
+	err := s.app.EnableCustomer(ctx, application.EnableCustomer{ID: request.GetId()})
 	return &customerspb.EnableCustomerResponse{}, err
+}
+
+func (s server) DisableCustomer(ctx context.Context, request *customerspb.DisableCustomerRequest) (*customerspb.DisableCustomerResponse, error) {
+	err := s.app.DisableCustomer(ctx, application.DisableCustomer{ID: request.GetId()})
+	return &customerspb.DisableCustomerResponse{}, err
 }
 
 func (s server) customerFromDomain(customer *domain.Customer) *customerspb.Customer {
@@ -67,5 +68,6 @@ func (s server) customerFromDomain(customer *domain.Customer) *customerspb.Custo
 		Id:        customer.ID,
 		Name:      customer.Name,
 		SmsNumber: customer.SmsNumber,
+		Enabled:   customer.Enabled,
 	}
 }
