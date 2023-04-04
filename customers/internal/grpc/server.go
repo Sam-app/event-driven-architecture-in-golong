@@ -54,6 +54,14 @@ func (s server) GetCustomer(ctx context.Context, request *customerspb.GetCustome
 	}, nil
 }
 
+func (s server) EnableCustomer(ctx context.Context, request *customerspb.EnableCustomerRequest) (*customerspb.EnableCustomerResponse, error) {
+	err := s.app.EnableCustomer(ctx, application.EnableCustomer{
+		ID: request.GetId(),
+	})
+
+	return &customerspb.EnableCustomerResponse{}, err
+}
+
 func (s server) customerFromDomain(customer *domain.Customer) *customerspb.Customer {
 	return &customerspb.Customer{
 		Id:        customer.ID,
